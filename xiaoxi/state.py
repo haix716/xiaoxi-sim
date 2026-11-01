@@ -50,9 +50,10 @@ class StateStore:
 
     def set_mode(self, mode: Mode) -> None:
         with self._lock:
+            # 只在 manual→replay 真切换时归零；replay 内连发命令（变速/seek）不打断进度
+            if mode == "replay" and self._state.mode != "replay":
+                self._state.frame = 0.0
             self._state.mode = mode
-            if mode == "replay":
-                self._state.frame = 0.0  # 兼容旧行为：进回放从头放
 
     def select_episode(self, ep: int) -> None:
         with self._lock:

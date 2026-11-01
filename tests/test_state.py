@@ -34,10 +34,17 @@ class TestMode:
     def test_enter_replay_resets_frame(self, store):
         store.set_mode("replay")
         store.advance_frame(N)
-        store.advance_frame(N)
         assert store.snapshot().frame > 0
-        store.set_mode("replay")  # 重新进入回放 → 从头放
+        store.set_mode("manual")
+        store.set_mode("replay")  # 手动→回放真切换 → 从头放
         assert store.snapshot().frame == 0.0
+
+    def test_replay_mode_noop_keeps_frame(self, store):
+        """replay 内连发 set_mode（变速/seek 会经过）不打断进度。"""
+        store.set_mode("replay")
+        store.advance_frame(N)
+        store.set_mode("replay")
+        assert store.snapshot().frame == 1.0
 
     def test_manual_keeps_frame(self, store):
         store.set_mode("replay")

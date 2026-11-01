@@ -61,8 +61,9 @@ async def mode(request: Request, mode: str | None = None,
 
 @router.post("/api/replay", response_model=StatusResponse)
 async def replay(body: ReplayBody, request: Request):
-    """统一入口：选集 / 变速 / seek / 暂停，全可选。"""
+    """回放统一入口：调用即进入 replay 模式；选集 / 变速 / seek / 暂停全可选。"""
     c = _core(request)
+    c.store.set_mode("replay")
     if body.ep is not None:
         _episode_length_or_422(c, body.ep)
         c.store.select_episode(body.ep)

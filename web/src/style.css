@@ -1,0 +1,76 @@
+/* 小犀示教台 全局样式：沿用旧版暗色 + 琥珀主色的视觉身份 */
+:root {
+  --bg: #14161a;
+  --panel: #1d2026;
+  --fg: #e8e6e3;
+  --dim: #8b8f98;
+  --acc: #e8b33d;
+  --line: #2c3038;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.5 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.app { padding: 14px; max-width: 1680px; margin: 0 auto; }
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+h1 { font-size: 15px; margin: 0; color: var(--acc); }
+
+main {
+  display: grid;
+  grid-template-columns: minmax(0, 44fr) minmax(240px, 25fr) minmax(300px, 31fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.col {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.data-col { display: flex; flex-direction: column; }
+.data-col .episodes { max-height: 250px; }
+
+.mode-row { display: flex; gap: 8px; align-items: center; }
+.mode-row .spacer { flex: 1; }
+
+button {
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--dim); }
+button.on { border-color: var(--acc); color: var(--acc); }
+
+input[type="range"] { accent-color: var(--acc); }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+@media (max-width: 1024px) {
+  main { grid-template-columns: 1fr 1fr; }
+  .video-col { grid-column: 1 / -1; }
+}
+@media (max-width: 680px) {
+  main { grid-template-columns: 1fr; }
+}
