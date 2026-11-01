@@ -54,7 +54,7 @@ class StateStore:
             if mode == "replay":
                 self._state.frame = 0.0  # 兼容旧行为：进回放从头放
 
-    def select_episode(self, ep: int, length: int) -> None:
+    def select_episode(self, ep: int) -> None:
         with self._lock:
             self._state.ep = int(ep)
             self._state.frame = 0.0
@@ -72,6 +72,10 @@ class StateStore:
         with self._lock:
             self._state.paused = not self._state.paused
             return self._state.paused
+
+    def set_paused(self, paused: bool) -> None:
+        with self._lock:
+            self._state.paused = bool(paused)
 
     def request_reset(self) -> None:
         with self._lock:

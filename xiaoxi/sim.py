@@ -2,8 +2,9 @@
 
 GL 三铁律（macOS 坑账，违反即静默挂死）：
 1. mujoco.Renderer 的创建与 close() 只发生在本线程内；
-2. 事件循环线程永远不碰 MjModel/MjData/Renderer——命令经 StateStore 下行，
-   快照经 FrameHub/TelemetryHub 上行，两个单向通道；
+2. 事件循环线程永远不碰 MjData/Renderer——命令经 StateStore 下行，
+   快照经 FrameHub/TelemetryHub 上行；MjModel 加载后不可变，跨线程只读
+   元数据（限位表）安全，但也仅此而已；
 3. 本线程不调用任何 asyncio API。
 
 省电三招（2026-10-15 引入，语义原样迁移）：
@@ -42,10 +43,11 @@ def encode_jpeg(img: np.ndarray, quality: int) -> bytes:
 class SimRuntime:
     """持有 MjModel/MjData/双 Renderer 的 daemon 线程。start()/stop() 由 lifespan 调。"""
 
-    def __init__(self, settings: Settings, dataset: EpisodeDataset,
-                 store: StateStore, frames: FrameHub,
+    def __init__(self, settings: Settings, model: "mujoco.MjModel",
+                 dataset: EpisodeDataset, store: StateStore, frames: FrameHub,
                  telemetry: TelemetryHub, audience: Audience) -> None:
         self._s = settings
+        self._model = model  # 由 app 层加载后传入（不可变，跨线程只读安全）
         self._dataset = dataset
         self._store = store
         self._frames = frames
@@ -76,8 +78,8 @@ class SimRuntime:
 
     def _run(self) -> None:
         s = self._s
-        model = mujoco.MjModel.from_xml_path(str(s.model_xml))
-        data = mujoco.MjData(model)
+        model = self._model
+        data = mujoco.MjData(model)  # MjData 线程私有，在本线程创建
         mujoco.mj_forward(model, data)
         renderer_main = mujoco.Renderer(model, height=s.render_height, width=s.render_width)
         renderer_wrist = mujoco.Renderer(model, height=s.wrist_height, width=s.wrist_width)

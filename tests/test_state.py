@@ -55,7 +55,7 @@ class TestReplay:
         assert 0.0 < store.snapshot().speed <= 4.0
 
     def test_seek_clamp_and_gen(self, store):
-        store.select_episode(0, N)
+        store.select_episode(0)
         store.seek(500, N)
         s = store.snapshot()
         assert s.frame == 500.0
@@ -67,7 +67,7 @@ class TestReplay:
         assert s.seek_gen == 3
 
     def test_advance_wraps(self, store):
-        store.select_episode(0, N)
+        store.select_episode(0)
         store.set_speed(2.0)
         for _ in range(N):
             store.advance_frame(N)
@@ -76,7 +76,7 @@ class TestReplay:
 
     def test_select_episode_resets_frame(self, store):
         store.advance_frame(N)
-        store.select_episode(5, N)
+        store.select_episode(5)
         assert store.snapshot().frame == 0.0
         assert store.snapshot().ep == 5
 
