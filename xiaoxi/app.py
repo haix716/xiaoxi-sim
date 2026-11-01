@@ -11,6 +11,7 @@ from typing import Protocol
 import mujoco
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from xiaoxi.api import control, info, video, ws
@@ -22,6 +23,10 @@ from xiaoxi.state import StateStore
 from xiaoxi.units import rad_to_deg
 
 log = logging.getLogger("xiaoxi")
+
+# 防 DNS rebinding：外部域名解析到 127.0.0.1 也过不了 Host 白名单
+# （testserver 是 starlette TestClient 的默认 Host）
+_TRUSTED_HOSTS = {"localhost", "127.0.0.1", "::1", "testserver"}
 
 
 class RuntimeLike(Protocol):
@@ -81,7 +86,11 @@ def create_app(settings: Settings | None = None,
     )
 
     @app.middleware("http")
-    async def doorbell(request: Request, call_next):
+    async def guard(request: Request, call_next):
+        # 防 DNS rebinding：本服务无鉴权，只允许本机源访问
+        host = request.headers.get("host", "").rsplit(":", 1)[0].strip("[]")
+        if host not in _TRUSTED_HOSTS:
+            return JSONResponse({"detail": "仅限本机访问"}, status_code=403)
         core.audience.note_activity()  # 门铃：有请求=有观众（省电三招③）
         return await call_next(request)
 

@@ -1,4 +1,6 @@
 """EpisodeDataset：真实数据集契约 + 合成数据边界。"""
+import json
+
 import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -69,7 +71,7 @@ class TestSynthetic:
         pq.write_table(meta, tmp_path / "meta/episodes/chunk-000/file-000.parquet")
         info = {"fps": 30, "features": {}}
         (tmp_path / "meta/info.json").write_text(
-            __import__("json").dumps(info), encoding="utf-8")
+            json.dumps(info), encoding="utf-8")
         return tmp_path
 
     def test_episode_split(self, tiny_root):

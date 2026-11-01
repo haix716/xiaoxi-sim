@@ -145,3 +145,10 @@ def test_ws_hello_and_telemetry(engine):
         msg = ws.receive_json()
         assert msg["type"] == "telemetry"
         assert msg["frame"] == 7.0
+
+
+def test_dns_rebinding_blocked(engine):
+    """Host 白名单：外部域名打到 127.0.0.1 要被 403。"""
+    client, _, _ = engine
+    r = client.get("/api/status", headers={"Host": "evil.example.com:8777"})
+    assert r.status_code == 403
