@@ -84,6 +84,9 @@ class StateStore:
             if self._state.mode == "replay" and length > 0:
                 self._state.frame = (self._state.frame + self._state.speed) % length
 
-    def clear_reset(self) -> None:
+    def complete_reset(self) -> None:
+        """sim 线程执行完复位后调用：清标记、帧号归零、手动目标归零（旧版同款）。"""
         with self._lock:
             self._state.reset_req = False
+            self._state.frame = 0.0
+            self._state.manual_ctrl[:] = 0.0
